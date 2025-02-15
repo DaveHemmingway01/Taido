@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Day Countdown</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+    #countdown {
+      font-family: Arial, sans-serif;
+      font-size: 120px;
+      font-weight: bold;
+      color: #000;  /* Black text */
+      background: transparent;
+      text-align: center;
+      margin-top: 20px;
+      transition: transform 0.6s;
+      display: inline-block;
+      animation: flip 0.8s;
+    }
+    @keyframes flip {
+      0% {
+        transform: rotateX(0deg);
+      }
+      30% {
+        transform: rotateX(90deg);
+      }
+      50% {
+        transform: rotateX(270deg);
+      }
+      80% {
+        transform: rotateX(360deg);
+      }
+      100% {
+        transform: rotateX(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="countdown"></div>
+  <script>
+    const now = new Date();
+    let targetYear = now.getMonth() > 6 || (now.getMonth() === 6 && now.getDate() >= 24)
+      ? now.getFullYear() + 1
+      : now.getFullYear();
+    const targetDate = new Date(`July 24, ${targetYear} 00:00:00`).getTime();
+
+    function updateCountdown() {
+      const currentTime = new Date().getTime();
+      const distance = targetDate - currentTime;
+      let days = Math.ceil(distance / (1000 * 60 * 60 * 24));
+      if (days < 0) days = 0;
+
+      const countdownEl = document.getElementById("countdown");
+      countdownEl.style.animation = 'none'; 
+      countdownEl.offsetHeight; // reflow to restart animation
+      countdownEl.style.animation = null; 
+      countdownEl.textContent = days;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 24 * 60 * 60 * 1000);
+  </script>
+</body>
+</html>
