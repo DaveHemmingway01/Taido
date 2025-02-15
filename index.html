@@ -2,36 +2,41 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Day Countdown</title>
+  <title>Countdown to July 24</title>
   <style>
+    /* Make body transparent and remove margins */
     body {
       margin: 0;
       padding: 0;
       background: transparent;
     }
+
+    /* Container for the countdown */
     #countdown {
       font-family: Arial, sans-serif;
-      font-size: 120px;
+      font-size: 60px; /* Adjust as needed */
       font-weight: bold;
       color: #000;  /* Black text */
       background: transparent;
       text-align: center;
-      margin-top: 20px;
-      transition: transform 0.6s;
+      margin: 40px;
       display: inline-block;
+      /* Flip animation (applied each time we update) */
       animation: flip 0.8s;
     }
+
+    /* Keyframe for a simple "flip" animation */
     @keyframes flip {
       0% {
         transform: rotateX(0deg);
       }
-      30% {
+      25% {
         transform: rotateX(90deg);
       }
       50% {
         transform: rotateX(270deg);
       }
-      80% {
+      75% {
         transform: rotateX(360deg);
       }
       100% {
@@ -42,27 +47,66 @@
 </head>
 <body>
   <div id="countdown"></div>
+
   <script>
-    const now = new Date();
-    let targetYear = now.getMonth() > 6 || (now.getMonth() === 6 && now.getDate() >= 24)
-      ? now.getFullYear() + 1
-      : now.getFullYear();
-    const targetDate = new Date(`July 24, ${targetYear} 00:00:00`).getTime();
+    // Dynamically determine the next July 24
+    function getNextJuly24() {
+      const now = new Date();
+      // Check if today's month/day is past July 24
+      const currentYear = now.getFullYear();
+      const july24ThisYear = new Date(`July 24, ${currentYear} 00:00:00`);
+      
+      if (now >= july24ThisYear) {
+        // If we're past July 24 this year, set target to next year
+        return new Date(`July 24, ${currentYear + 1} 00:00:00`).getTime();
+      } else {
+        // Otherwise, set target to this year
+        return july24ThisYear.getTime();
+      }
+    }
+
+    const targetDate = getNextJuly24();
 
     function updateCountdown() {
       const currentTime = new Date().getTime();
       const distance = targetDate - currentTime;
-      let days = Math.ceil(distance / (1000 * 60 * 60 * 24));
-      if (days < 0) days = 0;
 
-      const countdownEl = document.getElementById("countdown");
-      countdownEl.style.animation = 'none'; 
-      countdownEl.offsetHeight; // reflow to restart animation
-      countdownEl.style.animation = null; 
-      countdownEl.textContent = days;
+      if (distance <= 0) {
+        // If we've passed July 24, reset to next year
+        // (Alternatively, you could just set the countdown to 00:00:00:00)
+        location.reload();
+        return;
+      }
+
+      // Calculate days, hours, minutes, seconds
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Format with leading zeros if you like, e.g., 01, 05, etc. (optional)
+      const daysStr = String(days).padStart(2, '0');
+      const hoursStr = String(hours).padStart(2, '0');
+      const minutesStr = String(minutes).padStart(2, '0');
+      const secondsStr = String(seconds).padStart(2, '0');
+
+      // Build the countdown string
+      const countdownString = `${daysStr}d : ${hoursStr}h : ${minutesStr}m : ${secondsStr}s`;
+
+      // Update the element
+      const countdownEl = document.getElementById('countdown');
+      // Restart flip animation by toggling it off/on
+      countdownEl.style.animation = 'none';
+      countdownEl.offsetHeight; // force reflow
+      countdownEl.style.animation = null;
+
+      countdownEl.textContent = countdownString;
     }
+
+    // Run immediately
     updateCountdown();
-    setInterval(updateCountdown, 24 * 60 * 60 * 1000);
+    // Update every second
+    setInterval(updateCountdown, 1000);
   </script>
 </body>
 </html>
