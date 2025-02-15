@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Countdown to July 24</title>
+  <meta charset="UTF-8">
+  <title>Countdown to the Taido 2025 Convention</title>
   <style>
-    /* Make body transparent and remove margins */
+    /* Make body transparent and remove default margins */
     body {
       margin: 0;
       padding: 0;
       background: transparent;
     }
 
-    /* Container for the countdown */
-    #countdown {
-      font-family: Arial, sans-serif;
-      font-size: 60px; /* Adjust as needed */
-      font-weight: bold;
-      color: #000;  /* Black text */
-      background: transparent;
+    /* Overall container */
+    #countdown-container {
       text-align: center;
       margin: 40px;
+    }
+
+    /* Common font styling for all time parts */
+    .time-part {
+      font-family: Arial, sans-serif;
+      font-size: 60px; /* Adjust to your preference */
+      font-weight: bold;
+      color: #000; /* Black text */
+      background: transparent;
+    }
+
+    /*
+      We want only the seconds to flip.
+      So #seconds is given "display: inline-block" to allow the 3D flip animation.
+    */
+    #seconds {
       display: inline-block;
-      /* Flip animation (applied each time we update) */
-      animation: flip 0.8s;
     }
 
     /* Keyframe for a simple "flip" animation */
@@ -46,65 +55,78 @@
   </style>
 </head>
 <body>
-  <div id="countdown"></div>
+  <div id="countdown-container">
+    <span id="days" class="time-part"></span>d :
+    <span id="hours" class="time-part"></span>h :
+    <span id="minutes" class="time-part"></span>m :
+    <span id="seconds" class="time-part"></span>s
+  </div>
 
   <script>
-    // Dynamically determine the next July 24
+    // Function to figure out the next July 24
     function getNextJuly24() {
       const now = new Date();
-      // Check if today's month/day is past July 24
       const currentYear = now.getFullYear();
       const july24ThisYear = new Date(`July 24, ${currentYear} 00:00:00`);
       
+      // If today's date/time is >= July 24 this year, move to next year's July 24
       if (now >= july24ThisYear) {
-        // If we're past July 24 this year, set target to next year
         return new Date(`July 24, ${currentYear + 1} 00:00:00`).getTime();
-      } else {
-        // Otherwise, set target to this year
-        return july24ThisYear.getTime();
       }
+      return july24ThisYear.getTime();
     }
 
     const targetDate = getNextJuly24();
 
-    function updateCountdown() {
-      const currentTime = new Date().getTime();
-      const distance = targetDate - currentTime;
+    // Cache references to the spans
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
 
+    function updateCountdown() {
+      const now = new Date().getTime();
+      let distance = targetDate - now;
+
+      // If the date is reached or passed, reset to next year's date
       if (distance <= 0) {
-        // If we've passed July 24, reset to next year
-        // (Alternatively, you could just set the countdown to 00:00:00:00)
-        location.reload();
+        location.reload(); // or handle it another way if you prefer
         return;
       }
 
       // Calculate days, hours, minutes, seconds
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      distance %= (1000 * 60 * 60 * 24);
+      const hours = Math.floor(distance / (1000 * 60 * 60));
+      distance %= (1000 * 60 * 60);
+      const minutes = Math.floor(distance / (1000 * 60));
+      distance %= (1000 * 60);
+      const seconds = Math.floor(distance / 1000);
 
-      // Format with leading zeros if you like, e.g., 01, 05, etc. (optional)
+      // Optional: Zero-pad the numbers (e.g. 01, 02) if you want consistent formatting
       const daysStr = String(days).padStart(2, '0');
       const hoursStr = String(hours).padStart(2, '0');
       const minutesStr = String(minutes).padStart(2, '0');
       const secondsStr = String(seconds).padStart(2, '0');
 
-      // Build the countdown string
-      const countdownString = `${daysStr}d : ${hoursStr}h : ${minutesStr}m : ${secondsStr}s`;
+      // Update days/hours/minutes WITHOUT animation
+      daysEl.textContent = daysStr;
+      hoursEl.textContent = hoursStr;
+      minutesEl.textContent = minutesStr;
 
-      // Update the element
-      const countdownEl = document.getElementById('countdown');
-      // Restart flip animation by toggling it off/on
-      countdownEl.style.animation = 'none';
-      countdownEl.offsetHeight; // force reflow
-      countdownEl.style.animation = null;
-
-      countdownEl.textContent = countdownString;
+      // Update the seconds WITH a flip animation each time
+      // 1) Temporarily remove the animation so we can re-trigger it
+      secondsEl.style.animation = 'none';
+      secondsEl.offsetHeight; // forces a reflow
+      // 2) Reapply the animation
+      secondsEl.style.animation = 'flip 0.8s';
+      // 3) Update the text
+      secondsEl.textContent = secondsStr;
     }
 
-    // Run immediately
+    // Run once immediately
     updateCountdown();
+
     // Update every second
     setInterval(updateCountdown, 1000);
   </script>
