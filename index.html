@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Countdown to July 24 (Simple Seconds Flip)</title>
+  <title>Countdown to May 15, 2025</title>
   <style>
     /* Make the body transparent and remove default margins */
     body {
@@ -22,18 +22,17 @@
       font-family: Verdana, sans-serif;
       font-size: 38px; /* Adjust to your preference */
       font-weight: bold;
-      color: #0A5095;     /* Black text */
+      color: #0A5095;     /* Adjust color if you like */
       background: transparent;
     }
 
     /* Only the seconds span will get the flip animation */
     #seconds {
       display: inline-block;
-      /* Optionally add perspective for a slight 3D effect */
       perspective: 400px; 
     }
 
-    /* Keyframes for a simpler flip: rotate from 0° -> 90° -> back to 0° */
+    /* Keyframes for a simpler flip */
     @keyframes flip {
       0% {
         transform: rotateX(0deg);
@@ -56,31 +55,25 @@
   </div>
 
   <script>
-    // Determine next July 24
-    function getNextJuly24() {
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const july24ThisYear = new Date(`July 24, ${currentYear} 00:00:00`);
-      return (now >= july24ThisYear)
-        ? new Date(`July 24, ${currentYear + 1} 00:00:00`).getTime()
-        : july24ThisYear.getTime();
-    }
+    // Fixed target date: May 15, 2025 at 00:00:00
+    const targetDate = new Date('May 15, 2025 00:00:00').getTime();
 
-    const targetDate = getNextJuly24();
-
-    // Grab references to each span
     const daysEl = document.getElementById('days');
     const hoursEl = document.getElementById('hours');
     const minutesEl = document.getElementById('minutes');
     const secondsEl = document.getElementById('seconds');
 
     function updateCountdown() {
-      const now = new Date().getTime();
+      const now = Date.now();
       let distance = targetDate - now;
 
-      // If we've passed the target date, refresh to set next year's date
+      // If we've passed the target date, stop updating (or you could reload/show a message)
       if (distance <= 0) {
-        location.reload();
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minutesEl.textContent = '00';
+        secondsEl.textContent = '00';
+        clearInterval(intervalId);
         return;
       }
 
@@ -93,22 +86,21 @@
       distance %= (1000 * 60);
       const seconds = Math.floor(distance / 1000);
 
-      // Optional zero-pad for consistent 2 digits
+      // Update display with zero-padding
       daysEl.textContent = String(days).padStart(2, '0');
       hoursEl.textContent = String(hours).padStart(2, '0');
       minutesEl.textContent = String(minutes).padStart(2, '0');
 
-      // Trigger a simpler flip animation ONLY on seconds
-      secondsEl.style.animation = 'none';      // remove existing animation
-      secondsEl.offsetHeight;                  // force reflow
-      secondsEl.style.animation = 'flip 0.6s'; // reapply with your chosen duration
+      // Flip animation on seconds
+      secondsEl.style.animation = 'none';
+      secondsEl.offsetHeight; // trigger reflow
+      secondsEl.style.animation = 'flip 0.6s';
       secondsEl.textContent = String(seconds).padStart(2, '0');
     }
 
-    // Run once immediately
+    // Initial call & interval
     updateCountdown();
-    // Update every second
-    setInterval(updateCountdown, 1000);
+    const intervalId = setInterval(updateCountdown, 1000);
   </script>
 </body>
 </html>
